@@ -6,7 +6,13 @@ import "../src/SpaceInvadersGame.sol";
 
 contract DeploySpaceInvadersGame is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        string memory privateKeyStr = vm.envString("PRIVATE_KEY");
+        // Add 0x prefix if not present
+        bytes memory privateKeyBytes = bytes(privateKeyStr);
+        if (privateKeyBytes.length >= 2 && !(privateKeyBytes[0] == '0' && privateKeyBytes[1] == 'x')) {
+            privateKeyStr = string(abi.encodePacked("0x", privateKeyStr));
+        }
+        uint256 deployerPrivateKey = vm.parseUint(privateKeyStr);
         vm.startBroadcast(deployerPrivateKey);
 
         // Deploy the SpaceInvadersGame contract

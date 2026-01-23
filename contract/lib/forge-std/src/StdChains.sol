@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.6.2 <0.9.0;
+pragma experimental ABIEncoderV2;
 
 import {VmSafe} from "./Vm.sol";
 
@@ -175,7 +176,8 @@ abstract contract StdChains {
                     (errHash != keccak256(oldNotFoundError) && errHash != keccak256(newNotFoundError))
                         || bytes(chain.rpcUrl).length == 0
                 ) {
-                    assembly ("memory-safe") {
+                    /// @solidity memory-safe-assembly
+                    assembly {
                         revert(add(32, err), mload(err))
                     }
                 }
@@ -247,11 +249,6 @@ abstract contract StdChains {
         setChainWithDefaultRpcUrl("flare", ChainData("Flare", 14, "https://flare-api.flare.network/ext/C/rpc"));
         setChainWithDefaultRpcUrl(
             "flare_coston2", ChainData("Flare Coston2", 114, "https://coston2-api.flare.network/ext/C/rpc")
-        );
-
-        setChainWithDefaultRpcUrl("ink", ChainData("Ink", 57073, "https://rpc-gel.inkonchain.com"));
-        setChainWithDefaultRpcUrl(
-            "ink_sepolia", ChainData("Ink Sepolia", 763373, "https://rpc-gel-sepolia.inkonchain.com")
         );
 
         setChainWithDefaultRpcUrl("mode", ChainData("Mode", 34443, "https://mode.drpc.org"));

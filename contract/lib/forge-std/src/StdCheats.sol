@@ -1,5 +1,7 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.8.13 <0.9.0;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.6.2 <0.9.0;
+
+pragma experimental ABIEncoderV2;
 
 import {StdStorage, stdStorage} from "./StdStorage.sol";
 import {console2} from "./console2.sol";
@@ -390,7 +392,6 @@ abstract contract StdCheatsSafe {
     function rawToConvertedEIPTx1559(RawTx1559 memory rawTx) internal pure virtual returns (Tx1559 memory) {
         Tx1559 memory transaction;
         transaction.arguments = rawTx.arguments;
-        transaction.contractAddress = rawTx.contractAddress;
         transaction.contractName = rawTx.contractName;
         transaction.functionSig = rawTx.functionSig;
         transaction.hash = rawTx.hash;
@@ -500,7 +501,8 @@ abstract contract StdCheatsSafe {
     // e.g. `deployCode(code, abi.encode(arg1,arg2,arg3))`
     function deployCode(string memory what, bytes memory args) internal virtual returns (address addr) {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
 
@@ -509,7 +511,8 @@ abstract contract StdCheatsSafe {
 
     function deployCode(string memory what) internal virtual returns (address addr) {
         bytes memory bytecode = vm.getCode(what);
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             addr := create(0, add(bytecode, 0x20), mload(bytecode))
         }
 
@@ -519,7 +522,8 @@ abstract contract StdCheatsSafe {
     /// @dev deploy contract with value on construction
     function deployCode(string memory what, bytes memory args, uint256 val) internal virtual returns (address addr) {
         bytes memory bytecode = abi.encodePacked(vm.getCode(what), args);
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             addr := create(val, add(bytecode, 0x20), mload(bytecode))
         }
 
@@ -528,7 +532,8 @@ abstract contract StdCheatsSafe {
 
     function deployCode(string memory what, uint256 val) internal virtual returns (address addr) {
         bytes memory bytecode = vm.getCode(what);
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             addr := create(val, add(bytecode, 0x20), mload(bytecode))
         }
 
