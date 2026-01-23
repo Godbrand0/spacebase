@@ -1,0 +1,33 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjk3NDcxNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDk5NTU5OGM3Mjg1YkY4MDRFNzAwMzVkOEQxMkM4ZDY4NzM2NDcwQjAifQ",
+    "payload": "eyJkb21haW4iOiJzcGFjZS1vZGVzc2V5LnZlcmNlbC5hcHAifQ",
+    "signature": "5Ntepd6G82GjvNhuxZ6vG0sd1UY31bVR8EGODUuQO0gyfjwazAR4raH3aKWqzAL7X/+0tnbDkzUrJ2uRNHFNnBw="
+  },
+  "baseBuilder": {
+    "ownerAddress": "0x4665A823a7EC3BaB3575B51F0Fccead5916c2c93"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Space Odessey",
+    "homeUrl": "https://space-odessey.vercel.app",
+    "iconUrl": "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
+    "splashImageUrl": "https://image2url.com/images/1764357517154-180a4271-b440-4aff-9adc-38017fc9fffd.jpg",
+    "splashBackgroundColor": "#000000",
+    "subtitle": "Play & Earn CELO",
+    "description": "Space Invaders GameFi - Play, stake OCT tokens, compete for high scores, and claim CELO rewards!",
+    "screenshotUrls": [
+      "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
+      "https://image2url.com/images/1764357517154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
+      "https://image2url.com/images/1764357517154-6a721980-b52d-48a6-ad96-d763feaddb6a.png"
+    ],
+    "primaryCategory": "games",
+    "tags": ["games", "blockchain", "celo", "nft", "play-to-earn"],
+    "heroImageUrl": "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
+    "tagline": "Play Space Invaders",
+    "ogTitle": "Space Odessey - GameFi",
+    "ogDescription": "Play Space Invaders and earn CELO rewards on-chain",
+    "ogImageUrl": "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
+    "noindex": true
+  }
+}
