@@ -1,10 +1,12 @@
 /**
- * Contract configuration for SpaceInvadersGame Celo contract
+ * Contract configuration for SpaceInvadersGame Base contract
  */
 export const CONTRACT_CONFIG = {
-  address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xee713e7CC2DC316b353e62dB4D67EE40Fc981FFF',
-  network: process.env.NEXT_PUBLIC_NETWORK || 'celo',
-  rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || 'https://forno.celo.org',
+  address:
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+    "0xEa0f94BD92DbcE3D340E660311aA1cF9Aacbe11a",
+  network: process.env.NEXT_PUBLIC_NETWORK || "base",
+  rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://mainnet.base.org",
 };
 
 /**
@@ -12,477 +14,635 @@ export const CONTRACT_CONFIG = {
  */
 export const CONTRACT_ABI = [
   {
-    "type": "constructor",
-    "inputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "receive",
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "ALIENS_PER_ROW",
-    "inputs": [],
-    "outputs": [
+    name: "GameAbandoned",
+    type: "event",
+    anonymous: false,
+    inputs: [
       {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "LEVEL_DURATION",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_LEVELS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "REWARD_PER_LEVEL",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "abandonGame",
-    "inputs": [
-      {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "claimRewards",
-    "inputs": [
-      {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "completeLevel",
-    "inputs": [
-      {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: true,
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
       },
       {
-        "name": "level",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
       },
       {
-        "name": "score",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "uint256",
+        name: "levelsCompleted",
+        type: "uint256",
       },
       {
-        "name": "aliensDestroyed",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "uint256",
+        name: "partialRewards",
+        type: "uint256",
+      },
+    ],
+  },
+  {
+    name: "GameCompleted",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
       },
       {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "fundContract",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "gameSessions",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
       },
       {
-        "name": "player",
-        "type": "address",
-        "internalType": "address"
+        indexed: false,
+        internalType: "uint256",
+        name: "totalRewards",
+        type: "uint256",
+      },
+    ],
+  },
+  {
+    name: "GameStarted",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
       },
       {
-        "name": "currentLevel",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
       },
       {
-        "name": "levelsCompleted",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "uint256",
+        name: "startTime",
+        type: "uint256",
+      },
+    ],
+  },
+  {
+    name: "LevelCompleted",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
       },
       {
-        "name": "totalRewardsEarned",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
       },
       {
-        "name": "startTime",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "uint256",
+        name: "level",
+        type: "uint256",
       },
       {
-        "name": "levelStartTime",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "bytes32",
+        name: "levelHash",
+        type: "bytes32",
+      },
+    ],
+  },
+  {
+    name: "OwnerWithdraw",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
       },
       {
-        "name": "isActive",
-        "type": "bool",
-        "internalType": "bool"
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+  },
+  {
+    name: "RewardsClaimed",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
       },
       {
-        "name": "isCompleted",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getAlienCountForLevel",
-    "inputs": [
-      {
-        "name": "level",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "getContractBalance",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getLevelTimeRemaining",
-    "inputs": [
-      {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getPlayerSessions",
-    "inputs": [
-      {
-        "name": "player",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getPlayerTotalRewards",
-    "inputs": [
-      {
-        "name": "player",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getSessionInfo",
-    "inputs": [
-      {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "player",
-        "type": "address",
-        "internalType": "address"
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
       },
       {
-        "name": "currentLevel",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+  },
+  {
+    name: "ContractFunded",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "funder",
+        type: "address",
       },
       {
-        "name": "levelsCompleted",
-        "type": "uint256",
-        "internalType": "uint256"
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
       },
       {
-        "name": "totalRewardsEarned",
-        "type": "uint256",
-        "internalType": "uint256"
+        internalType: "uint256",
+        name: "level",
+        type: "uint256",
       },
       {
-        "name": "startTime",
-        "type": "uint256",
-        "internalType": "uint256"
+        internalType: "uint256",
+        name: "score",
+        type: "uint256",
       },
       {
-        "name": "isActive",
-        "type": "bool",
-        "internalType": "bool"
+        internalType: "uint256",
+        name: "aliensDestroyed",
+        type: "uint256",
       },
       {
-        "name": "isCompleted",
-        "type": "bool",
-        "internalType": "bool"
-      }
+        internalType: "bytes",
+        name: "proof",
+        type: "bytes",
+      },
     ],
-    "stateMutability": "view"
+    name: "completeLevel",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "levelHashUsed",
-    "inputs": [
+    inputs: [
       {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
+      },
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
+    name: "abandonGame",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "owner",
-    "inputs": [],
-    "outputs": [
+    inputs: [
       {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "view"
+    name: "claimRewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "pause",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "paused",
-    "inputs": [],
-    "outputs": [
+    inputs: [],
+    name: "startGame",
+    outputs: [
       {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "view"
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "playerSessions",
-    "inputs": [
+    inputs: [],
+    name: "pause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "unpause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
       {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "fundContract",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getContractBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "level",
+        type: "uint256",
+      },
+    ],
+    name: "getAlienCountForLevel",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
+      },
+    ],
+    name: "getSessionInfo",
+    outputs: [
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
       },
       {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
+        internalType: "uint256",
+        name: "currentLevel",
+        type: "uint256",
+      },
       {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        internalType: "uint256",
+        name: "levelsCompleted",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalRewardsEarned",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "startTime",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "isActive",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "isCompleted",
+        type: "bool",
+      },
     ],
-    "stateMutability": "view"
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "playerTotalRewards",
-    "inputs": [
+    inputs: [
       {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
+        internalType: "uint256",
+        name: "sessionId",
+        type: "uint256",
+      },
     ],
-    "outputs": [
+    name: "getLevelTimeRemaining",
+    outputs: [
       {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "view"
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "renounceOwnership",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "startGame",
-    "inputs": [],
-    "outputs": [
+    inputs: [
       {
-        "name": "sessionId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
     ],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "transferOwnership",
-    "inputs": [
+    name: "getPlayerSessions",
+    outputs: [
       {
-        "name": "newOwner",
-        "type": "address",
-        "internalType": "address"
-      }
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "type": "function",
-    "name": "unpause",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "withdraw",
-    "inputs": [
+    inputs: [
       {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  }
+    name: "getPlayerTotalRewards",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "gameSessions",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "sessionId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "player",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "currentLevel",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "levelsCompleted",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "totalRewardsEarned",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "startTime",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "levelStartTime",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isActive",
+            type: "bool",
+          },
+          {
+            internalType: "bool",
+            name: "isCompleted",
+            type: "bool",
+          },
+          {
+            internalType: "uint256[]",
+            name: "levelHashes",
+            type: "uint256[]",
+          },
+        ],
+        internalType: "struct SpaceInvadersGame.GameSession",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "playerSessions",
+    outputs: [
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "playerTotalRewards",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "levelHashUsed",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "REWARD_PER_LEVEL",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "MAX_LEVELS",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "LEVEL_DURATION",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ALIENS_PER_ROW",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "paused",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
+    payable: true,
+  },
 ];
 
 /**
@@ -490,25 +650,25 @@ export const CONTRACT_ABI = [
  */
 export const CONTRACT_FUNCTIONS = {
   // Entry functions
-  START_GAME: 'startGame',
-  COMPLETE_LEVEL: 'completeLevel',
-  ABANDON_GAME: 'abandonGame',
-  CLAIM_REWARDS: 'claimRewards',
-  FUND_CONTRACT: 'fundContract',
-  
+  START_GAME: "startGame",
+  COMPLETE_LEVEL: "completeLevel",
+  ABANDON_GAME: "abandonGame",
+  CLAIM_REWARDS: "claimRewards",
+  FUND_CONTRACT: "fundContract",
+
   // View functions
-  GET_SESSION_INFO: 'getSessionInfo',
-  GET_CONTRACT_BALANCE: 'getContractBalance',
-  GET_ALIEN_COUNT_FOR_LEVEL: 'getAlienCountForLevel',
-  GET_PLAYER_SESSIONS: 'getPlayerSessions',
-  GET_PLAYER_TOTAL_REWARDS: 'getPlayerTotalRewards',
-  GET_LEVEL_TIME_REMAINING: 'getLevelTimeRemaining',
-  
+  GET_SESSION_INFO: "getSessionInfo",
+  GET_CONTRACT_BALANCE: "getContractBalance",
+  GET_ALIEN_COUNT_FOR_LEVEL: "getAlienCountForLevel",
+  GET_PLAYER_SESSIONS: "getPlayerSessions",
+  GET_PLAYER_TOTAL_REWARDS: "getPlayerTotalRewards",
+  GET_LEVEL_TIME_REMAINING: "getLevelTimeRemaining",
+
   // Constants
-  ALIENS_PER_ROW: 'ALIENS_PER_ROW',
-  LEVEL_DURATION: 'LEVEL_DURATION',
-  MAX_LEVELS: 'MAX_LEVELS',
-  REWARD_PER_LEVEL: 'REWARD_PER_LEVEL',
+  ALIENS_PER_ROW: "ALIENS_PER_ROW",
+  LEVEL_DURATION: "LEVEL_DURATION",
+  MAX_LEVELS: "MAX_LEVELS",
+  REWARD_PER_LEVEL: "REWARD_PER_LEVEL",
 };
 
 /**
@@ -529,7 +689,7 @@ export interface GameSessionInfo {
  */
 export function parseSessionInfo(data: any): GameSessionInfo | null {
   if (!data || data.length < 7) return null;
-  
+
   return {
     player: data[0],
     currentLevel: Number(data[1]),
@@ -542,18 +702,18 @@ export function parseSessionInfo(data: any): GameSessionInfo | null {
 }
 
 /**
- * Format CELO amount (from wei to CELO)
+ * Format ETH amount (from wei to ETH)
  */
-export function formatCELO(amount: number | bigint): string {
-  const celoAmount = Number(amount) / 1e18;
-  return celoAmount.toFixed(6);
+export function formatETH(amount: number | bigint): string {
+  const ethAmount = Number(amount) / 1e18;
+  return ethAmount.toFixed(6);
 }
 
 /**
- * Convert CELO to wei
+ * Convert ETH to wei
  */
-export function celoToWei(celoAmount: number): bigint {
-  return BigInt(Math.floor(celoAmount * 1e18));
+export function ethToWei(ethAmount: number): bigint {
+  return BigInt(Math.floor(ethAmount * 1e18));
 }
 
 /**
@@ -572,7 +732,7 @@ export const LEVEL_DURATION_SECONDS = 300; // 5 minutes
  * Game constants from contract
  */
 export const MAX_LEVELS = 5; // Default value, should be fetched from contract
-export const REWARD_PER_LEVEL = 1; // 1 CELO per level, should be fetched from contract
+export const REWARD_PER_LEVEL = 1; // 1 ETH per level, should be fetched from contract
 
 /**
  * Calculate time remaining for a level
