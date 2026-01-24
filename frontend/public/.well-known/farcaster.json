@@ -14,19 +14,19 @@
     "iconUrl": "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
     "splashImageUrl": "https://image2url.com/images/1764357517154-180a4271-b440-4aff-9adc-38017fc9fffd.jpg",
     "splashBackgroundColor": "#000000",
-    "subtitle": "Play & Earn CELO",
-    "description": "Space Invaders GameFi - Play, stake OCT tokens, compete for high scores, and claim CELO rewards!",
+    "subtitle": "Play & Earn ETH",
+    "description": "Space Invaders GameFi - Play, stake OCT tokens, compete for high scores, and claim ETH rewards!",
     "screenshotUrls": [
       "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
       "https://image2url.com/images/1764357517154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
       "https://image2url.com/images/1764357517154-6a721980-b52d-48a6-ad96-d763feaddb6a.png"
     ],
     "primaryCategory": "games",
-    "tags": ["games", "blockchain", "celo", "nft", "play-to-earn"],
+    "tags": ["games", "blockchain", "ethereum", "nft", "play-to-earn"],
     "heroImageUrl": "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
     "tagline": "Play Space Invaders",
     "ogTitle": "Space Odessey - GameFi",
-    "ogDescription": "Play Space Invaders and earn CELO rewards on-chain",
+    "ogDescription": "Play Space Invaders and earn ETH rewards on-chain",
     "ogImageUrl": "https://image2url.com/images/1764357447154-6a721980-b52d-48a6-ad96-d763feaddb6a.png",
     "noindex": true
   }
