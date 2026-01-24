@@ -6,7 +6,7 @@ import { useConnect, useAccount } from 'wagmi'
 
 /**
  * Hook to detect and auto-connect MiniPay wallet
- * MiniPay is Opera's built-in Celo wallet for mobile
+ * MiniPay is Opera's built-in crypto wallet for mobile
  *
  * @returns Object containing isMiniPay status and auto-connect state
  */
