@@ -1,8 +1,12 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useSwitchChain } from "wagmi";
+import { base } from "wagmi/chains";
 
 export function WalletConnect() {
+  const { switchChain } = useSwitchChain();
+
   return (
     <ConnectButton.Custom>
       {({
@@ -49,10 +53,10 @@ export function WalletConnect() {
                 );
               }
 
-              if (chain.unsupported) {
+              if (chain.unsupported || chain.id !== base.id) {
                 return (
                   <button
-                    onClick={openChainModal}
+                    onClick={() => switchChain({ chainId: base.id })}
                     type="button"
                     className="arcade-button"
                     style={{
@@ -60,7 +64,7 @@ export function WalletConnect() {
                       fontSize: "10px",
                     }}
                   >
-                    WRONG NETWORK
+                    SWITCH TO BASE
                   </button>
                 );
               }
