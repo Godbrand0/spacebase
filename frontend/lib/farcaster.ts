@@ -10,8 +10,9 @@ export function isInMiniApp(): boolean {
     // Check if we're in an iframe (MiniApps run in iframes)
     const inIframe = window.self !== window.top;
     
-    // Check for Farcaster-specific context
-    const hasFarcasterContext = sdk.context !== null;
+    // Check for Farcaster-specific context or SDK presence
+    // The SDK context is populated when running inside Farcaster
+    const hasFarcasterContext = !!sdk.context;
     
     return inIframe && hasFarcasterContext;
   } catch (e) {
