@@ -92,8 +92,7 @@ export function clearCachedGameState(sessionId: string): void {
 }
 
 /**
- * Clear all expired game state caches
- */
+ * Clear all expired game state c
 export function clearExpiredCaches(): void {
   try {
     const keys = Object.keys(localStorage)
