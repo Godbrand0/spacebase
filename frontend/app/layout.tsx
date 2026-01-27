@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "@/components/RainbowKitProvider";
+import { FarcasterInit } from "@/components/FarcasterInit";
+import "@rainbow-me/rainbowkit/styles.css";
 import "./globals.css";
 import { Providers } from "./providers";
 import { FarcasterInit } from "@/components/FarcasterInit";
