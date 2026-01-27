@@ -14,14 +14,14 @@ import {
 import { WalletConnect } from "./WalletConnect";
 import { MiniAppConnect } from "./MiniAppConnect";
 import { TransactionStatus } from "./TransactionStatus";
-import { useMiniPay } from "@/hooks/useMiniPay";
+
 import { isInMiniApp, triggerHaptic } from "@/lib/farcaster";
 
 export function GameUI() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { address, isConnected } = useAccount();
   const gameState = useGameState(canvasRef.current);
-  const { isMiniPay, isAutoConnecting } = useMiniPay();
+
   const [isFarcasterMiniApp, setIsFarcasterMiniApp] = useState(false);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export function GameUI() {
             }
           }
 
-          // Method 2: Try topics (most reliable for MiniPay)
+          // Method 2: Try topics
           const topics = (log as any).topics;
           if (topics && Array.isArray(topics) && topics.length > 1) {
             try {
@@ -248,56 +248,24 @@ export function GameUI() {
             </p>
           </div>
 
-          {/* MiniPay-specific welcome message */}
-          {isMiniPay ? (
-            <div className="space-y-6 mt-12">
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-4xl">📱</span>
-                <p
-                  className="text-lg arcade-font pulse-glow"
-                  style={{ color: "var(--neon-green)", fontSize: "12px" }}
-                >
-                  MINIPAY DETECTED
-                </p>
-              </div>
-              {isAutoConnecting && (
-                <p
-                  className="text-lg arcade-font animate-pulse"
-                  style={{ color: "var(--neon-cyan)", fontSize: "10px" }}
-                >
-                  CONNECTING WALLET...
-                </p>
-              )}
-              <p
-                className="text-lg arcade-font"
-                style={{ color: "var(--neon-yellow)", fontSize: "10px" }}
-              >
-                PLAY & EARN CELO
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-6 mt-12">
-              <p
-                className="text-lg arcade-font"
-                style={{ color: "var(--neon-green)", fontSize: "12px" }}
-              >
-                CONNECT WALLET TO START
-              </p>
-              <p
-                className="text-lg arcade-font"
-                style={{ color: "var(--neon-green)", fontSize: "12px" }}
-              >
-                EARN CELO REWARDS
-              </p>
-            </div>
-          )}
+          <div className="space-y-6 mt-12">
+            <p
+              className="text-lg arcade-font"
+              style={{ color: "var(--neon-green)", fontSize: "12px" }}
+            >
+              CONNECT WALLET TO START
+            </p>
+            <p
+              className="text-lg arcade-font"
+              style={{ color: "var(--neon-green)", fontSize: "12px" }}
+            >
+              EARN CELO REWARDS
+            </p>
+          </div>
 
-          {/* Hide connect button if MiniPay is auto-connecting */}
-          {!isAutoConnecting && (
-            <div className="mt-8">
-              {isFarcasterMiniApp ? <MiniAppConnect /> : <WalletConnect />}
-            </div>
-          )}
+          <div className="mt-8">
+            {isFarcasterMiniApp ? <MiniAppConnect /> : <WalletConnect />}
+          </div>
 
           <div className="mt-12 flex justify-center gap-4">
             <div className="text-center">
