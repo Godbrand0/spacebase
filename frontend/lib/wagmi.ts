@@ -1,4 +1,4 @@
-import { http, createConfig } from "wagmi";
+import { http, createConfig, createStorage, cookieStorage } from "wagmi";
 import { base, baseSepolia, mantleSepoliaTestnet } from "wagmi/chains";
 import { injected, walletConnect } from "wagmi/connectors";
 import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
@@ -8,6 +8,10 @@ const customRpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
 export const config = createConfig({
   chains: [base, baseSepolia, mantleSepoliaTestnet],
+  ssr: true,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
   connectors: [
     // Farcaster MiniApp connector
     miniAppConnector(),
