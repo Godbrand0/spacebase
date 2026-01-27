@@ -1,121 +1,145 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
-interface TransactionStatusProps {
-  isPending: boolean
-  isConfirming: boolean
-  isConfirmed: boolean
-  error: Error | null
-  hash: string | null
-  successMessage?: string
-  pendingMessage?: string
-}
+export function TransactionStatus() {
+  const [showStatus, setShowStatus] = useState(false);
+  const [status, setStatus] = useState<{
+    isPending: boolean;
+    isConfirming: boolean;
+    isConfirmed: boolean;
+    error: Error | null;
+    hash: string | null;
+    message: string;
+  }>({
+    isPending: false,
+    isConfirming: false,
+    isConfirmed: false,
+    error: null,
+    hash: null,
+    message: "",
+  });
 
-export function TransactionStatus({
-  isPending,
-  isConfirming,
-  isConfirmed,
-  error,
-  hash,
-  successMessage = 'Transaction completed successfully!',
-  pendingMessage = 'Transaction in progress...',
-}: TransactionStatusProps) {
-  const [showStatus, setShowStatus] = useState(false)
+  // This component would typically receive transaction status from a global state or context
+  // For now, it's a placeholder that can be enhanced with proper state management
 
   useEffect(() => {
-    if (isPending || isConfirming || error || isConfirmed) {
-      setShowStatus(true)
+    if (
+      status.isPending ||
+      status.isConfirming ||
+      status.error ||
+      status.isConfirmed
+    ) {
+      setShowStatus(true);
     }
-  }, [isPending, isConfirming, error, isConfirmed])
+  }, [status.isPending, status.isConfirming, status.error, status.isConfirmed]);
 
   useEffect(() => {
-    if (isConfirmed && !error) {
+    if (status.isConfirmed && !status.error) {
       const timer = setTimeout(() => {
-        setShowStatus(false)
-      }, 3000)
-      return () => clearTimeout(timer)
+        setShowStatus(false);
+      }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [isConfirmed, error])
+  }, [status.isConfirmed, status.error]);
 
-  if (!showStatus) return null
+  if (!showStatus) return null;
 
   const getStatusColor = () => {
-    if (error) return 'var(--neon-red)'
-    if (isConfirmed) return 'var(--neon-green)'
-    return 'var(--neon-cyan)'
-  }
+    if (status.error) return "var(--neon-red)";
+    if (status.isConfirmed) return "var(--neon-green)";
+    return "var(--neon-cyan)";
+  };
 
-  const statusColor = getStatusColor()
+  const statusColor = getStatusColor();
 
   return (
     <div className="fixed top-4 right-4 z-50 max-w-sm">
       <div
         className="arcade-font pulse-glow"
         style={{
-          padding: '16px',
-          background: 'linear-gradient(180deg, rgba(26, 11, 46, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%)',
+          padding: "16px",
+          background:
+            "linear-gradient(180deg, rgba(26, 11, 46, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%)",
           border: `3px solid ${statusColor}`,
-          borderRadius: '8px',
+          borderRadius: "8px",
           boxShadow: `0 0 20px ${statusColor}, inset 0 0 20px rgba(0, 0, 0, 0.5)`,
-          fontSize: '10px'
+          fontSize: "10px",
         }}
       >
-        {error && (
+        {status.error && (
           <div className="flex items-center gap-3">
             <div className="text-2xl">⚠️</div>
             <div>
-              <p className="neon-text" style={{ color: 'var(--neon-red)', marginBottom: '4px' }}>
+              <p
+                className="neon-text"
+                style={{ color: "var(--neon-red)", marginBottom: "4px" }}
+              >
                 TRANSACTION FAILED
               </p>
-              <p style={{ color: 'var(--arcade-pink)', fontSize: '8px' }}>
-                {error.message}
+              <p style={{ color: "var(--arcade-pink)", fontSize: "8px" }}>
+                {status.error.message}
               </p>
             </div>
           </div>
         )}
 
-        {isConfirming && (
+        {status.isConfirming && (
           <div className="flex items-center gap-3">
             <div className="text-2xl animate-spin">⏳</div>
             <div>
-              <p className="neon-text" style={{ color: 'var(--neon-cyan)', marginBottom: '4px' }}>
+              <p
+                className="neon-text"
+                style={{ color: "var(--neon-cyan)", marginBottom: "4px" }}
+              >
                 CONFIRMING
               </p>
-              <p style={{ color: 'var(--arcade-cyan)', fontSize: '8px' }}>
-                {pendingMessage}
+              <p style={{ color: "var(--arcade-cyan)", fontSize: "8px" }}>
+                {status.message || "Transaction in progress..."}
               </p>
             </div>
           </div>
         )}
 
-        {isPending && !isConfirming && (
+        {status.isPending && !status.isConfirming && (
           <div className="flex items-center gap-3">
             <div className="text-2xl animate-pulse">🔄</div>
             <div>
-              <p className="neon-text" style={{ color: 'var(--neon-cyan)', marginBottom: '4px' }}>
+              <p
+                className="neon-text"
+                style={{ color: "var(--neon-cyan)", marginBottom: "4px" }}
+              >
                 PROCESSING
               </p>
-              <p style={{ color: 'var(--arcade-cyan)', fontSize: '8px' }}>
-                {pendingMessage}
+              <p style={{ color: "var(--arcade-cyan)", fontSize: "8px" }}>
+                {status.message || "Transaction in progress..."}
               </p>
             </div>
           </div>
         )}
 
-        {isConfirmed && !error && (
+        {status.isConfirmed && !status.error && (
           <div className="flex items-center gap-3">
             <div className="text-2xl">✅</div>
             <div>
-              <p className="neon-text" style={{ color: 'var(--neon-green)', marginBottom: '4px' }}>
+              <p
+                className="neon-text"
+                style={{ color: "var(--neon-green)", marginBottom: "4px" }}
+              >
                 SUCCESS!
               </p>
-              <p style={{ color: 'var(--arcade-green)', fontSize: '8px' }}>
-                {successMessage}
+              <p style={{ color: "var(--arcade-green)", fontSize: "8px" }}>
+                {status.message || "Transaction completed successfully!"}
               </p>
-              {hash && (
-                <p style={{ color: 'var(--arcade-cyan)', fontSize: '7px', marginTop: '4px' }}>
-                  TX: {hash.slice(0, 10)}...{hash.slice(-8)}
+              {status.hash && (
+                <p
+                  style={{
+                    color: "var(--arcade-cyan)",
+                    fontSize: "7px",
+                    marginTop: "4px",
+                  }}
+                >
+                  TX: {status.hash.slice(0, 10)}...{status.hash.slice(-8)}
                 </p>
               )}
             </div>
@@ -123,5 +147,5 @@ export function TransactionStatus({
         )}
       </div>
     </div>
-  )
+  );
 }

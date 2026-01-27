@@ -4,6 +4,8 @@ import { Providers } from "@/components/RainbowKitProvider";
 import { FarcasterInit } from "@/components/FarcasterInit";
 import "@rainbow-me/rainbowkit/styles.css";
 import "./globals.css";
+import { Providers } from "./providers";
+import { FarcasterInit } from "@/components/FarcasterInit";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Alien Invaders GameFi",
-  description: "Play Space Invaders and earn CELO rewards on-chain",
+  title: "Space Invaders | Earn ETH",
+  description: "Play Space Invaders and earn ETH rewards on Base",
 };
 
 export default function RootLayout({

@@ -3,6 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Arcade/Neon theme colors */
+  --neon-green: #00ff88;
+  --neon-cyan: #00ffff;
+  --neon-pink: #ff00ff;
+  --neon-red: #ff0044;
+  --neon-yellow: #ffff00;
+  --arcade-green: #00ff88;
+  --arcade-cyan: #00ffff;
+  --arcade-pink: #ff00ff;
+  --arcade-red: #ff0044;
+  --arcade-yellow: #ffff00;
 }
 
 @theme inline {
@@ -23,4 +34,51 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Arcade-style utilities */
+.arcade-font {
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.arcade-button {
+  background: linear-gradient(180deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.1) 100%);
+  border: 2px solid var(--neon-green);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.arcade-button:hover {
+  background: linear-gradient(180deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 255, 136, 0.2) 100%);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+  transform: translateY(-2px);
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+  }
+}
+
+.neon-text {
+  text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
 }

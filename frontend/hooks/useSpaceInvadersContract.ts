@@ -5,7 +5,7 @@ import { CONTRACT_CONFIG, CONTRACT_ABI, CONTRACT_FUNCTIONS } from '@/lib/contrac
 import { parseEther, formatEther } from 'viem'
 
 export function useStartGame() {
-  const { writeContract, isPending, data: hash, error } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash, error } = useWriteContract()
 
   const startGame = async () => {
     console.log('🔗 Contract address:', CONTRACT_CONFIG.address)
@@ -13,13 +13,13 @@ export function useStartGame() {
     
     try {
       console.log('📤 Sending transaction to contract...')
-      await writeContract({
+      const txHash = await writeContractAsync({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.START_GAME,
       })
       console.log('✅ Transaction sent successfully')
-      return hash
+      return txHash
     } catch (err) {
       console.error('❌ Error starting game:', err)
       throw err
@@ -42,7 +42,7 @@ export function useStartGame() {
 }
 
 export function useCompleteLevel() {
-  const { writeContract, isPending, data: hash, error } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash, error } = useWriteContract()
 
   const completeLevel = async (
     sessionId: bigint,
@@ -59,7 +59,7 @@ export function useCompleteLevel() {
       console.log('🎯 Score:', score)
       console.log('👾 Aliens destroyed:', aliensDestroyed)
       
-      await writeContract({
+      return await writeContractAsync({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.COMPLETE_LEVEL,
@@ -91,11 +91,11 @@ export function useCompleteLevel() {
 }
 
 export function useAbandonGame() {
-  const { writeContract, isPending, data: hash, error } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash, error } = useWriteContract()
 
   const abandonGame = async (sessionId: bigint) => {
     try {
-      await writeContract({
+      return await writeContractAsync({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.ABANDON_GAME,
@@ -122,7 +122,7 @@ export function useAbandonGame() {
 }
 
 export function useClaimRewards() {
-  const { writeContract, isPending, data: hash, error } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash, error } = useWriteContract()
 
   const claimRewards = async (sessionId: bigint) => {
     try {
@@ -130,7 +130,7 @@ export function useClaimRewards() {
       console.log('📋 Contract function:', CONTRACT_FUNCTIONS.CLAIM_REWARDS)
       console.log('🆔 SessionId:', sessionId.toString())
       
-      await writeContract({
+      return await writeContractAsync({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.CLAIM_REWARDS,
