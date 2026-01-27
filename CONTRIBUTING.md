@@ -9,6 +9,7 @@ Thank you for your interest in contributing to Spacebase! This document provides
 - Node.js (v18 or higher)
 - pnpm package manager
 - Git
+- Foundry (for smart contract development)
 - Basic knowledge of React, TypeScript, and Solidity
 
 ### Setup
@@ -18,6 +19,7 @@ Thank you for your interest in contributing to Spacebase! This document provides
 3. Install dependencies:
    ```bash
    pnpm install
+   cd contract && forge install
    ```
 
 ### Project Structure
@@ -28,13 +30,20 @@ spacebase/
 │   ├── src/                  # Contract source files
 │   ├── script/               # Deployment scripts
 │   ├── test/                 # Contract tests
+│   ├── lib/                  # Dependencies (OpenZeppelin, Forge Std)
 │   └── foundry.toml          # Foundry configuration
-├── frontend/                 # Web application (Next.js)
+├── frontend/                 # Web application (Next.js) - In Development
 │   ├── app/                  # React components
+│   ├── components/           # Reusable UI components
 │   ├── hooks/                # Custom React hooks
 │   ├── lib/                  # Utility libraries
 │   └── public/               # Static assets
-└── DEVELOPMENT_ISSUES.md     # List of development tasks
+├── docs/                    # Documentation
+│   ├── api/                 # API documentation
+│   └── examples/            # Code examples
+├── CONTRIBUTING.md          # This file
+├── DEVELOPMENT_ISSUES.md    # Current development tasks
+└── README.md               # Project overview
 ```
 
 ## Development Workflow
@@ -58,6 +67,7 @@ git checkout -b fix/your-bug-fix
 - Follow the existing code style
 - Write tests for new functionality
 - Update documentation as needed
+- Add documentation updates as part of definition of done for new features
 
 ### 4. Test Your Changes
 
@@ -65,8 +75,11 @@ git checkout -b fix/your-bug-fix
 # Test contracts
 cd contract && forge test
 
-# Test frontend
+# Test frontend (when implemented)
 cd frontend && pnpm test
+
+# Format and lint contracts
+cd contract && forge fmt
 ```
 
 ### 5. Submit a Pull Request
@@ -118,6 +131,7 @@ cd frontend && pnpm test
 
 ## Getting Help
 
+- Check the [documentation](../docs/README.md) for detailed guides
 - Join our Discord community
 - Ask questions in GitHub discussions
 - Check existing issues and documentation
