@@ -3,9 +3,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAccount } from 'wagmi'
 import { WalletConnect } from '@/components/WalletConnect'
+import { StandardConnect } from '@/components/StandardConnect'
 import { useGameState } from '@/hooks/useGameState'
 import { useStartGame, useCompleteLevel, useAbandonGame, useClaimRewards } from '@/hooks/useSpaceInvadersContract'
 import { TransactionStatus } from '@/components/TransactionStatus'
+import { isInMiniApp } from '@/lib/farcaster'
 
 export default function Home() {
   const { address, isConnected } = useAccount()
@@ -14,7 +16,7 @@ export default function Home() {
   const [showInstructions, setShowInstructions] = useState(true)
   
   const gameState = useGameState(canvasRef.current)
-  const { startGame, isPending: isStartPending } = useStartGame()
+  const { startGame, isPending: isStartPending, isConfirming, isConfirmed, hash, receipt, error } = useStartGame()
   const { completeLevel, isPending: isCompletePending } = useCompleteLevel()
   const { abandonGame, isPending: isAbandonPending } = useAbandonGame()
   const { claimRewards, isPending: isClaimPending } = useClaimRewards()
@@ -23,10 +25,10 @@ export default function Home() {
     if (!isConnected) return
     
     try {
-      setShowInstructions(false)
       const hash = await startGame()
       if (hash) {
-        // Game will be initialized after transaction confirms
+        // Game will be initialized after transaction confirms via useEffect
+        setShowInstructions(false)
         setGameStarted(true)
       }
     } catch (error) {
@@ -54,15 +56,21 @@ export default function Home() {
   }
 
   const handleAbandonGame = async () => {
-    if (!gameState.sessionId) return
+    if (!gameState.sessionId) {
+      setGameStarted(false)
+      setShowInstructions(true)
+      return
+    }
     
     try {
       await abandonGame(gameState.sessionId)
+    } catch (error) {
+      console.error('Failed to abandon game on contract:', error)
+    } finally {
+      // Always reset UI state even if contract call fails
       gameState.resetGame()
       setGameStarted(false)
       setShowInstructions(true)
-    } catch (error) {
-      console.error('Failed to abandon game:', error)
     }
   }
 
@@ -86,13 +94,21 @@ export default function Home() {
 
   // Initialize game when transaction confirms
   useEffect(() => {
-    if (gameStarted && !gameState.game && canvasRef.current) {
-      // This would be triggered after the startGame transaction confirms
-      // For now, we'll use a placeholder session ID
-      const sessionId = BigInt(Date.now())
-      gameState.initializeGame(sessionId)
+    if (gameStarted && !gameState.game && canvasRef.current && isConfirmed && receipt) {
+      const { parseSessionIdFromReceipt } = require('@/hooks/useSpaceInvadersContract')
+      const sessionId = parseSessionIdFromReceipt(receipt)
+      
+      if (sessionId) {
+        console.log('✅ Extracted real sessionId from receipt:', sessionId.toString())
+        gameState.initializeGame(sessionId)
+      } else {
+        console.error('❌ Failed to extract sessionId from receipt')
+        // Fallback or error handling
+        setGameStarted(false)
+        setShowInstructions(true)
+      }
     }
-  }, [gameStarted, gameState.game, gameState.initializeGame])
+  }, [gameStarted, gameState.game, gameState.initializeGame, isConfirmed, receipt])
 
   return (
     <div className="min-h-screen bg-black text-green-400 flex flex-col items-center justify-center p-4">
@@ -100,8 +116,9 @@ export default function Home() {
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 text-green-400">SPACE INVADERS</h1>
           <p className="text-lg">Play and Earn ETH on Base Network</p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-2 items-center">
             <WalletConnect />
+            <StandardConnect />
           </div>
         </header>
 

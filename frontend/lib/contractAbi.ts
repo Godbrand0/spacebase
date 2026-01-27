@@ -17,7 +17,7 @@ export const CONTRACT_ABI = [
     name: "GameAbandoned",
     type: "event",
     anonymous: false,
-    inputs: [
+    inputs: [ 
       {
         indexed: true,
         internalType: "uint256",
