@@ -118,7 +118,7 @@ export default function Home() {
           <p className="text-lg">Play and Earn ETH on Base Network</p>
           <div className="mt-4 flex flex-col gap-2 items-center">
             <WalletConnect />
-            <StandardConnect />
+            {!isInMiniApp() && <StandardConnect />}
           </div>
         </header>
 

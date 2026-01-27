@@ -17,6 +17,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Space Invaders | Earn ETH",
   description: "Play Space Invaders and earn ETH rewards on Base",
+  other: {
+    "fc:frame": JSON.stringify({
+      version: "next",
+      imageUrl: "https://space-odessey.vercel.app/splash.jpg",
+      button: {
+        title: "Play Space Invaders",
+        action: {
+          type: "launch_app",
+          name: "Space Odessey",
+          url: "https://space-odessey.vercel.app/",
+          splashImageUrl: "https://space-odessey.vercel.app/splash.jpg",
+          splashBackgroundColor: "#000000",
+        },
+      },
+    }),
+  },
 };
 
 export default function RootLayout({
