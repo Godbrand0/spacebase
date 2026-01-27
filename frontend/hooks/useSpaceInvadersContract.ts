@@ -1,83 +1,130 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import {
-  useWalletClient,
-  usePublicClient,
-  useWaitForTransactionReceipt,
-  useReadContract,
-  useAccount,
-} from "wagmi";
-import {
-  CONTRACT_CONFIG,
-  CONTRACT_ABI,
-  CONTRACT_FUNCTIONS,
-} from "@/lib/contractAbi";
-import { formatEther } from "viem";
-import { writeContract } from "viem/actions";
+import { useState } from 'react'
+import { useConnectorClient, usePublicClient, useWaitForTransactionReceipt, useReadContract, useAccount } from 'wagmi'
+
+import { getConnectorClient } from 'wagmi/actions'
+
+import { config } from '@/lib/wagmi'
+import { CONTRACT_CONFIG, CONTRACT_ABI, CONTRACT_FUNCTIONS } from '@/lib/contractAbi'
+import { formatEther } from 'viem'
+import { writeContract } from 'viem/actions'
+import { base, mantleSepoliaTestnet } from 'wagmi/chains'
+import { decodeEventLog } from 'viem'
+
+export function parseSessionIdFromReceipt(receipt: any): bigint | null {
+  if (!receipt || !receipt.logs) return null
+  
+  for (const log of receipt.logs) {
+    try {
+      const decoded = decodeEventLog({
+        abi: CONTRACT_ABI,
+        data: log.data,
+        topics: log.topics,
+      })
+      
+      if (decoded.eventName === 'GameStarted' && decoded.args) {
+        const args = decoded.args as any
+        if (args.sessionId) {
+          return BigInt(args.sessionId)
+        }
+      }
+    } catch (e) {
+      // Skip logs that don't match our ABI
+      continue
+    }
+  }
+  
+  return null
+}
 
 export function useStartGame() {
-  const { address, isConnected } = useAccount();
-  const { data: walletClient, isLoading: isWalletLoading } = useWalletClient();
-  const publicClient = usePublicClient();
-  const [isPending, setIsPending] = useState(false);
-  const [hash, setHash] = useState<`0x${string}` | undefined>();
-  const [error, setError] = useState<Error | null>(null);
+  const { address, isConnected, connector } = useAccount()
+  const { data: walletClient, isLoading: isWalletLoading, error: clientError } = useConnectorClient()
+  const publicClient = usePublicClient()
+  const [isPending, setIsPending] = useState(false)
+  const [hash, setHash] = useState<`0x${string}` | undefined>()
+  const [error, setError] = useState<Error | null>(null)
 
   const startGame = async () => {
-    console.log("🚀 startGame called", {
-      isConnected,
-      address,
-      hasWalletClient: !!walletClient,
+    console.log('🚀 startGame called', { 
+      isConnected, 
+      address, 
+      connector: connector?.name,
+      connectorId: connector?.id,
+      hasWalletClient: !!walletClient, 
       isWalletLoading,
-    });
-
-    if (!walletClient || !publicClient) {
-      const err = new Error(
-        !isConnected
-          ? "Wallet not connected"
-          : "Initializing wallet connection... please try again in a moment.",
-      );
-      setError(err);
-      throw err;
+      clientError: clientError?.message
+    })
+    
+    let client = walletClient
+    
+    // Fallback: Try to get the client manually if the hook hasn't provided it yet
+    if (!client && isConnected && connector) {
+      try {
+        console.log('🔄 Attempting to get wallet client manually...')
+        client = await getConnectorClient(config, { connector })
+        console.log('✅ Manually retrieved wallet client')
+      } catch (e) {
+        console.error('❌ Failed to get wallet client manually:', e)
+      }
     }
 
-    setIsPending(true);
-    setError(null);
+    // Check if we are on the correct chain (Base)
+    const currentChainId = await publicClient.getChainId()
+    if (currentChainId !== base.id) {
+      const err = new Error(`Wrong network. Please switch to Base (Chain ID: ${base.id}). Current Chain ID: ${currentChainId}`)
+      setError(err)
+      throw err
+    }
+    
+    if (!client || !publicClient) {
+      let errorMessage = 'Initializing wallet connection... please try again in a moment.'
+      if (!isConnected) {
+        errorMessage = 'Wallet not connected. Please connect your wallet first.'
+      } else if (clientError) {
+        errorMessage = `Wallet connection error: ${clientError.message}`
+      } else if (!client) {
+        errorMessage = `Wallet client not ready for ${connector?.name || 'unknown connector'}. Please refresh or try again.`
+      }
+      
+      const err = new Error(errorMessage)
+      setError(err)
+      throw err
+    }
 
+    setIsPending(true)
+    setError(null)
+    
     try {
-      console.log("🔗 Contract address:", CONTRACT_CONFIG.address);
-      console.log("📋 Contract function:", CONTRACT_FUNCTIONS.START_GAME);
-      console.log("📤 Sending transaction to contract...");
+      console.log('🔗 Contract address:', CONTRACT_CONFIG.address)
+      console.log('📋 Contract function:', CONTRACT_FUNCTIONS.START_GAME)
+      console.log('📤 Sending transaction to contract...')
 
       const { request } = await publicClient.simulateContract({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.START_GAME,
-        account: walletClient.account,
-      });
+        account: client.account,
+      })
 
-      const txHash = await writeContract(walletClient, request);
-      setHash(txHash);
-      console.log("✅ Transaction sent successfully");
-      return txHash;
+      const txHash = await writeContract(client, request)
+      setHash(txHash)
+      console.log('✅ Transaction sent successfully')
+      return txHash
     } catch (err) {
-      console.error("❌ Error starting game:", err);
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      throw error;
+      console.error('❌ Error starting game:', err)
+      const error = err instanceof Error ? err : new Error(String(err))
+      setError(error)
+      throw error
     } finally {
-      setIsPending(false);
+      setIsPending(false)
     }
-  };
+  }
 
-  const {
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    data: receipt,
-  } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed, data: receipt } = useWaitForTransactionReceipt({
     hash,
-  });
+  })
 
   return {
     startGame,
@@ -87,78 +134,66 @@ export function useStartGame() {
     hash,
     receipt,
     error,
-  };
+  }
 }
 
 export function useCompleteLevel() {
-  const { isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
-  const [isPending, setIsPending] = useState(false);
-  const [hash, setHash] = useState<`0x${string}` | undefined>();
-  const [error, setError] = useState<Error | null>(null);
+  const { isConnected, connector } = useAccount()
+  const { data: walletClient } = useConnectorClient()
+  const publicClient = usePublicClient()
+  const [isPending, setIsPending] = useState(false)
+  const [hash, setHash] = useState<`0x${string}` | undefined>()
+  const [error, setError] = useState<Error | null>(null)
 
   const completeLevel = async (
     sessionId: bigint,
     level: number,
     score: number,
     aliensDestroyed: number,
-    proof: `0x${string}`,
+    proof: `0x${string}`
   ) => {
-    if (!walletClient || !publicClient) {
-      const err = new Error(
-        !isConnected ? "Wallet not connected" : "Wallet client not ready",
-      );
-      setError(err);
-      throw err;
+    let client = walletClient
+    
+    if (!client && isConnected && connector) {
+      try {
+        client = await getConnectorClient(config, { connector })
+      } catch (e) {}
     }
 
-    setIsPending(true);
-    setError(null);
+    if (!client || !publicClient) {
+      const err = new Error(!isConnected ? 'Wallet not connected' : `Wallet client not ready for ${connector?.name || 'unknown'}`)
+      setError(err)
+      throw err
+    }
+
+    setIsPending(true)
+    setError(null)
 
     try {
-      console.log("🔗 Contract address:", CONTRACT_CONFIG.address);
-      console.log("📋 Contract function:", CONTRACT_FUNCTIONS.COMPLETE_LEVEL);
-      console.log("🆔 SessionId:", sessionId.toString());
-      console.log("📊 Level:", level);
-      console.log("🎯 Score:", score);
-      console.log("👾 Aliens destroyed:", aliensDestroyed);
-
       const { request } = await publicClient.simulateContract({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.COMPLETE_LEVEL,
-        args: [
-          sessionId,
-          BigInt(level),
-          BigInt(score),
-          BigInt(aliensDestroyed),
-          proof,
-        ],
-        account: walletClient.account,
-      });
+        args: [sessionId, BigInt(level), BigInt(score), BigInt(aliensDestroyed), proof],
+        account: client.account,
+      })
 
-      const txHash = await writeContract(walletClient, request);
-      setHash(txHash);
-      return txHash;
+      const txHash = await writeContract(client, request)
+      setHash(txHash)
+      return txHash
     } catch (err) {
-      console.error("❌ Error completing level:", err);
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      if (err instanceof Error) {
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
-      }
-      throw error;
+      console.error('❌ Error completing level:', err)
+      const error = err instanceof Error ? err : new Error(String(err))
+      setError(error)
+      throw error
     } finally {
-      setIsPending(false);
+      setIsPending(false)
     }
-  };
+  }
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
 
   return {
     completeLevel,
@@ -167,28 +202,34 @@ export function useCompleteLevel() {
     isConfirmed,
     hash,
     error,
-  };
+  }
 }
 
 export function useAbandonGame() {
-  const { isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
-  const [isPending, setIsPending] = useState(false);
-  const [hash, setHash] = useState<`0x${string}` | undefined>();
-  const [error, setError] = useState<Error | null>(null);
+  const { isConnected, connector } = useAccount()
+  const { data: walletClient } = useConnectorClient()
+  const publicClient = usePublicClient()
+  const [isPending, setIsPending] = useState(false)
+  const [hash, setHash] = useState<`0x${string}` | undefined>()
+  const [error, setError] = useState<Error | null>(null)
 
   const abandonGame = async (sessionId: bigint) => {
-    if (!walletClient || !publicClient) {
-      const err = new Error(
-        !isConnected ? "Wallet not connected" : "Wallet client not ready",
-      );
-      setError(err);
-      throw err;
+    let client = walletClient
+    
+    if (!client && isConnected && connector) {
+      try {
+        client = await getConnectorClient(config, { connector })
+      } catch (e) {}
     }
 
-    setIsPending(true);
-    setError(null);
+    if (!client || !publicClient) {
+      const err = new Error(!isConnected ? 'Wallet not connected' : `Wallet client not ready for ${connector?.name || 'unknown'}`)
+      setError(err)
+      throw err
+    }
+
+    setIsPending(true)
+    setError(null)
 
     try {
       const { request } = await publicClient.simulateContract({
@@ -196,26 +237,25 @@ export function useAbandonGame() {
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.ABANDON_GAME,
         args: [sessionId],
-        account: walletClient.account,
-      });
+        account: client.account,
+      })
 
-      const txHash = await writeContract(walletClient, request);
-      setHash(txHash);
-      return txHash;
+      const txHash = await writeContract(client, request)
+      setHash(txHash)
+      return txHash
     } catch (err) {
-      console.error("Error abandoning game:", err);
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      throw error;
+      console.error('Error abandoning game:', err)
+      const error = err instanceof Error ? err : new Error(String(err))
+      setError(error)
+      throw error
     } finally {
-      setIsPending(false);
+      setIsPending(false)
     }
-  };
+  }
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
 
   return {
     abandonGame,
@@ -224,63 +264,60 @@ export function useAbandonGame() {
     isConfirmed,
     hash,
     error,
-  };
+  }
 }
 
 export function useClaimRewards() {
-  const { isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
-  const [isPending, setIsPending] = useState(false);
-  const [hash, setHash] = useState<`0x${string}` | undefined>();
-  const [error, setError] = useState<Error | null>(null);
+  const { isConnected, connector } = useAccount()
+  const { data: walletClient } = useConnectorClient()
+  const publicClient = usePublicClient()
+  const [isPending, setIsPending] = useState(false)
+  const [hash, setHash] = useState<`0x${string}` | undefined>()
+  const [error, setError] = useState<Error | null>(null)
 
   const claimRewards = async (sessionId: bigint) => {
-    if (!walletClient || !publicClient) {
-      const err = new Error(
-        !isConnected ? "Wallet not connected" : "Wallet client not ready",
-      );
-      setError(err);
-      throw err;
+    let client = walletClient
+    
+    if (!client && isConnected && connector) {
+      try {
+        client = await getConnectorClient(config, { connector })
+      } catch (e) {}
     }
 
-    setIsPending(true);
-    setError(null);
+    if (!client || !publicClient) {
+      const err = new Error(!isConnected ? 'Wallet not connected' : `Wallet client not ready for ${connector?.name || 'unknown'}`)
+      setError(err)
+      throw err
+    }
+
+    setIsPending(true)
+    setError(null)
 
     try {
-      console.log("🔗 Contract address:", CONTRACT_CONFIG.address);
-      console.log("📋 Contract function:", CONTRACT_FUNCTIONS.CLAIM_REWARDS);
-      console.log("🆔 SessionId:", sessionId.toString());
-
       const { request } = await publicClient.simulateContract({
         address: CONTRACT_CONFIG.address as `0x${string}`,
         abi: CONTRACT_ABI,
         functionName: CONTRACT_FUNCTIONS.CLAIM_REWARDS,
         args: [sessionId],
-        account: walletClient.account,
-      });
+        account: client.account,
+      })
 
-      const txHash = await writeContract(walletClient, request);
-      setHash(txHash);
-      return txHash;
+      const txHash = await writeContract(client, request)
+      setHash(txHash)
+      return txHash
     } catch (err) {
-      console.error("❌ Error claiming rewards:", err);
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      if (err instanceof Error) {
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
-      }
-      throw error;
+      console.error('❌ Error claiming rewards:', err)
+      const error = err instanceof Error ? err : new Error(String(err))
+      setError(error)
+      throw error
     } finally {
-      setIsPending(false);
+      setIsPending(false)
     }
-  };
+  }
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
 
   return {
     claimRewards,
@@ -289,7 +326,7 @@ export function useClaimRewards() {
     isConfirmed,
     hash,
     error,
-  };
+  }
 }
 
 export function useSessionInfo(sessionId: bigint | null) {
@@ -301,14 +338,14 @@ export function useSessionInfo(sessionId: bigint | null) {
     query: {
       enabled: !!sessionId,
     },
-  });
+  })
 
   return {
     sessionInfo: data,
     error,
     isLoading,
     refetch,
-  };
+  }
 }
 
 export function useContractBalance() {
@@ -316,15 +353,15 @@ export function useContractBalance() {
     address: CONTRACT_CONFIG.address as `0x${string}`,
     abi: CONTRACT_ABI,
     functionName: CONTRACT_FUNCTIONS.GET_CONTRACT_BALANCE,
-  });
+  })
 
   return {
-    balance: data ? formatEther(data as bigint) : "0",
+    balance: data ? formatEther(data as bigint) : '0',
     balanceWei: data,
     error,
     isLoading,
     refetch,
-  };
+  }
 }
 
 export function usePlayerTotalRewards(playerAddress: `0x${string}` | null) {
@@ -336,15 +373,15 @@ export function usePlayerTotalRewards(playerAddress: `0x${string}` | null) {
     query: {
       enabled: !!playerAddress,
     },
-  });
+  })
 
   return {
-    totalRewards: data ? formatEther(data as bigint) : "0",
+    totalRewards: data ? formatEther(data as bigint) : '0',
     totalRewardsWei: data,
     error,
     isLoading,
     refetch,
-  };
+  }
 }
 
 export function useAlienCountForLevel(level: number) {
@@ -353,13 +390,13 @@ export function useAlienCountForLevel(level: number) {
     abi: CONTRACT_ABI,
     functionName: CONTRACT_FUNCTIONS.GET_ALIEN_COUNT_FOR_LEVEL,
     args: [BigInt(level)],
-  });
+  })
 
   return {
     alienCount: data ? Number(data) : 0,
     error,
     isLoading,
-  };
+  }
 }
 
 export function useLevelTimeRemaining(sessionId: bigint | null) {
@@ -371,12 +408,12 @@ export function useLevelTimeRemaining(sessionId: bigint | null) {
     query: {
       enabled: false, // Disabled - we'll use client-side timer instead
     },
-  });
+  })
 
   return {
     timeRemaining: data ? Number(data) : 0,
     error,
     isLoading,
     refetch,
-  };
+  }
 }

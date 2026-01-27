@@ -1,19 +1,19 @@
 import { http, createConfig } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
-import { injected, metaMask, walletConnect } from "wagmi/connectors";
+import { base, baseSepolia, mantleSepoliaTestnet } from "wagmi/chains";
+import { injected, walletConnect } from "wagmi/connectors";
 import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 
-const projectId =
-  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "default-project-id";
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "default-project-id";
 const customRpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 
 export const config = createConfig({
-  chains: [base, baseSepolia],
+  chains: [base, baseSepolia, mantleSepoliaTestnet],
   connectors: [
-    // Farcaster MiniApp connector (priority for MiniApp environment)
+    // Farcaster MiniApp connector
     miniAppConnector(),
+    // Injected handles MetaMask, Coinbase Wallet, etc.
     injected(),
-    metaMask(),
+    // WalletConnect for mobile wallets
     walletConnect({
       projectId,
       metadata: {
@@ -27,14 +27,15 @@ export const config = createConfig({
   transports: {
     [base.id]: http(customRpcUrl, {
       retryCount: 5,
-      retryDelay: 2000, // 2 second delay between retries (increased from 1s)
-      timeout: 30000, // 30 seconds timeout
+      retryDelay: 2000,
+      timeout: 30000,
     }),
     [baseSepolia.id]: http(customRpcUrl, {
       retryCount: 5,
-      retryDelay: 2000, // 2 second delay between retries (increased from 1s)
-      timeout: 30000, // 30 seconds timeout
+      retryDelay: 2000,
+      timeout: 30000,
     }),
+    [mantleSepoliaTestnet.id]: http(),
   },
 });
 
