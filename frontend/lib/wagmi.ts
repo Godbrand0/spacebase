@@ -12,7 +12,7 @@ export const config = createConfig({
   storage: createStorage({
     storage: cookieStorage,
   }),
-  connectors: [
+  connectors: typeof window !== 'undefined' ? [
     // Farcaster MiniApp connector
     miniAppConnector(),
     // Injected handles MetaMask, Coinbase Wallet, etc.
@@ -27,7 +27,7 @@ export const config = createConfig({
         icons: ["https://spaceinvaders.game/icon.png"],
       },
     }),
-  ],
+  ] : [],
   transports: {
     [base.id]: http(customRpcUrl, {
       retryCount: 5,
