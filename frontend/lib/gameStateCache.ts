@@ -23,6 +23,8 @@ const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
  * Get cached game state for a session
  */
 export function getCachedGameState(sessionId: string): CachedGameState | null {
+  if (typeof window === 'undefined') return null;
+  
   try {
     const key = `${CACHE_KEY_PREFIX}${sessionId}`
     const cached = localStorage.getItem(key)
@@ -50,6 +52,8 @@ export function getCachedGameState(sessionId: string): CachedGameState | null {
  * Save game state to cache
  */
 export function setCachedGameState(state: CachedGameState): void {
+  if (typeof window === 'undefined') return;
+  
   try {
     const key = `${CACHE_KEY_PREFIX}${state.sessionId}`
     const stateWithTimestamp = {
@@ -83,6 +87,8 @@ export function updateCachedGameState(
  * Clear cached game state for a session
  */
 export function clearCachedGameState(sessionId: string): void {
+  if (typeof window === 'undefined') return;
+  
   try {
     const key = `${CACHE_KEY_PREFIX}${sessionId}`
     localStorage.removeItem(key)
@@ -92,8 +98,11 @@ export function clearCachedGameState(sessionId: string): void {
 }
 
 /**
- * Clear all expired game state c
+ * Clear all expired game state caches
+ */
 export function clearExpiredCaches(): void {
+  if (typeof window === 'undefined') return;
+  
   try {
     const keys = Object.keys(localStorage)
     const now = Date.now()
