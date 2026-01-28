@@ -12,22 +12,26 @@ export const config = createConfig({
   storage: createStorage({
     storage: cookieStorage,
   }),
-  connectors: typeof window !== 'undefined' ? [
-    // Farcaster MiniApp connector
-    miniAppConnector(),
-    // Injected handles MetaMask, Coinbase Wallet, etc.
-    injected(),
-    // WalletConnect for mobile wallets
-    walletConnect({
-      projectId,
-      metadata: {
-        name: "Alien Invaders GameFi",
-        description: "Play Space Invaders and earn ETH rewards",
-        url: typeof window !== "undefined" ? window.location.origin : "",
-        icons: ["https://spaceinvaders.game/icon.png"],
-      },
-    }),
-  ] : [],
+  connectors: typeof window !== 'undefined' ? (
+    // If we're in a Farcaster MiniApp, we should ONLY use the miniAppConnector
+    // to avoid conflicts with other injected providers that might not work in the iframe
+    window.self !== window.top ? [miniAppConnector()] : [
+      // Farcaster MiniApp connector (can still be included for discovery)
+      miniAppConnector(),
+      // Injected handles MetaMask, Coinbase Wallet, etc.
+      injected(),
+      // WalletConnect for mobile wallets
+      walletConnect({
+        projectId,
+        metadata: {
+          name: "Alien Invaders GameFi",
+          description: "Play Space Invaders and earn ETH rewards",
+          url: typeof window !== "undefined" ? window.location.origin : "",
+          icons: ["https://spaceinvaders.game/icon.png"],
+        },
+      }),
+    ]
+  ) : [],
   transports: {
     [base.id]: http(customRpcUrl, {
       retryCount: 5,

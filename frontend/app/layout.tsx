@@ -21,14 +21,14 @@ export const metadata: Metadata = {
   other: {
     "fc:frame": JSON.stringify({
       version: "next",
-      imageUrl: "https://space-odessey.vercel.app/splash.jpg",
+      imageUrl: "https://spacebase-blond.vercel.app/splash.jpg",
       button: {
         title: "Play Space Invaders",
         action: {
           type: "launch_app",
           name: "Space Odessey",
-          url: "https://space-odessey.vercel.app/",
-          splashImageUrl: "https://space-odessey.vercel.app/splash.jpg",
+          url: "https://spacebase-blond.vercel.app/",
+          splashImageUrl: "https://spacebase-blond.vercel.app/splash.jpg",
           splashBackgroundColor: "#000000",
         },
       },

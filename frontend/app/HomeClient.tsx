@@ -7,13 +7,18 @@ import { StandardConnect } from '@/components/StandardConnect'
 import { useGameState } from '@/hooks/useGameState'
 import { useStartGame, useCompleteLevel, useAbandonGame, useClaimRewards } from '@/hooks/useSpaceInvadersContract'
 import { TransactionStatus } from '@/components/TransactionStatus'
-import { isInMiniApp } from '@/lib/farcaster'
+import { isInMiniApp, initializeFarcasterSDK } from '@/lib/farcaster'
 
 export default function HomeClient() {
   const { address, isConnected } = useAccount()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [gameStarted, setGameStarted] = useState(false)
   const [showInstructions, setShowInstructions] = useState(true)
+
+  // Initialize Farcaster SDK
+  useEffect(() => {
+    initializeFarcasterSDK()
+  }, [])
   
   const gameState = useGameState(canvasRef.current)
   const { 
