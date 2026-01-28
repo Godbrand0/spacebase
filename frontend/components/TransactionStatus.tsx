@@ -2,23 +2,33 @@
 
 import { useEffect, useState } from "react";
 
-export function TransactionStatus() {
+interface TransactionStatusProps {
+  isPending: boolean;
+  isConfirming: boolean;
+  isConfirmed: boolean;
+  error: Error | null;
+  hash: string | null;
+  pendingMessage?: string;
+}
+
+export function TransactionStatus({
+  isPending,
+  isConfirming,
+  isConfirmed,
+  error,
+  hash,
+  pendingMessage,
+}: TransactionStatusProps) {
   const [showStatus, setShowStatus] = useState(false);
-  const [status, setStatus] = useState<{
-    isPending: boolean;
-    isConfirming: boolean;
-    isConfirmed: boolean;
-    error: Error | null;
-    hash: string | null;
-    message: string;
-  }>({
-    isPending: false,
-    isConfirming: false,
-    isConfirmed: false,
-    error: null,
-    hash: null,
-    message: "",
-  });
+  
+  const status = {
+    isPending,
+    isConfirming,
+    isConfirmed,
+    error,
+    hash,
+    message: pendingMessage || "",
+  };
 
   // This component would typically receive transaction status from a global state or context
   // For now, it's a placeholder that can be enhanced with proper state management

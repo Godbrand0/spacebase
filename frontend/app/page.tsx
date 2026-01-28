@@ -16,10 +16,53 @@ export default function Home() {
   const [showInstructions, setShowInstructions] = useState(true)
   
   const gameState = useGameState(canvasRef.current)
-  const { startGame, isPending: isStartPending, isConfirming, isConfirmed, hash, receipt, error } = useStartGame()
-  const { completeLevel, isPending: isCompletePending } = useCompleteLevel()
-  const { abandonGame, isPending: isAbandonPending } = useAbandonGame()
-  const { claimRewards, isPending: isClaimPending } = useClaimRewards()
+  const { 
+    startGame, 
+    isPending: isStartPending, 
+    isConfirming: isStartConfirming, 
+    isConfirmed: isStartConfirmed, 
+    hash: startHash, 
+    receipt, 
+    error: startError 
+  } = useStartGame()
+  
+  const { 
+    completeLevel, 
+    isPending: isCompletePending,
+    isConfirming: isCompleteConfirming,
+    isConfirmed: isCompleteConfirmed,
+    hash: completeHash,
+    error: completeError
+  } = useCompleteLevel()
+  
+  const { 
+    abandonGame, 
+    isPending: isAbandonPending,
+    isConfirming: isAbandonConfirming,
+    isConfirmed: isAbandonConfirmed,
+    hash: abandonHash,
+    error: abandonError
+  } = useAbandonGame()
+  
+  const { 
+    claimRewards, 
+    isPending: isClaimPending,
+    isConfirming: isClaimConfirming,
+    isConfirmed: isClaimConfirmed,
+    hash: claimHash,
+    error: claimError
+  } = useClaimRewards()
+
+  const isPending = isStartPending || isCompletePending || isAbandonPending || isClaimPending
+  const isConfirming = isStartConfirming || isCompleteConfirming || isAbandonConfirming || isClaimConfirming
+  const isConfirmed = isStartConfirmed || isCompleteConfirmed || isAbandonConfirmed || isClaimConfirmed
+  const hash = startHash || completeHash || abandonHash || claimHash
+  const error = startError || completeError || abandonError || claimError
+
+  const pendingMessage = isStartPending || isStartConfirming ? 'Starting game...' :
+                        isCompletePending || isCompleteConfirming ? 'Completing level...' :
+                        isAbandonPending || isAbandonConfirming ? 'Abandoning game...' :
+                        isClaimPending || isClaimConfirming ? 'Claiming rewards...' : ''
 
   const handleStartGame = async () => {
     if (!isConnected) return
@@ -94,7 +137,7 @@ export default function Home() {
 
   // Initialize game when transaction confirms
   useEffect(() => {
-    if (gameStarted && !gameState.game && canvasRef.current && isConfirmed && receipt) {
+    if (gameStarted && !gameState.game && canvasRef.current && isStartConfirmed && receipt) {
       const { parseSessionIdFromReceipt } = require('@/hooks/useSpaceInvadersContract')
       const sessionId = parseSessionIdFromReceipt(receipt)
       
@@ -108,7 +151,7 @@ export default function Home() {
         setShowInstructions(true)
       }
     }
-  }, [gameStarted, gameState.game, gameState.initializeGame, isConfirmed, receipt])
+  }, [gameStarted, gameState.game, gameState.initializeGame, isStartConfirmed, receipt])
 
   return (
     <div className="min-h-screen bg-black text-green-400 flex flex-col items-center justify-center p-4">
@@ -252,7 +295,14 @@ export default function Home() {
           </div>
         )}
 
-        <TransactionStatus />
+        <TransactionStatus 
+          isPending={isPending}
+          isConfirming={isConfirming}
+          isConfirmed={isConfirmed}
+          hash={hash || null}
+          error={error}
+          pendingMessage={pendingMessage}
+        />
       </div>
     </div>
   )
